@@ -271,6 +271,7 @@ const videos = reactive([])
 //   }, 3000)
 //   load()
 // })
+console.log(plugin)
 </script>
 
 <!-- <template>
