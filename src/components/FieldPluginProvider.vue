@@ -10,6 +10,7 @@ import { convertToRaw } from '../utils'
 const plugin = reactive<FieldPluginResponse>({
   type: 'loading',
 })
+
 createFieldPlugin((newState) => {
   plugin.type = newState.type
   plugin.error = newState.error

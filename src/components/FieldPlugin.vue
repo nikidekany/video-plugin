@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import VimeoPlayer from './VideoPlayer.vue'
 import { useFieldPlugin } from '../useFieldPlugin'
-import { ref, onMounted, watch, reactive } from 'vue'
-const plugin = useFieldPlugin()
+import { ref, onMounted, watchEffect, reactive } from 'vue'
+import { Asset } from '@storyblok/field-plugin'
 
+const plugin = useFieldPlugin()
+const hls = ref<String>()
+const audio = ref<String>()
 const hasAutoplay = true
 const hasControls = true
 const hasMute = true
@@ -11,7 +14,7 @@ const vimeoHLS = ''
 const vimeoMP4 = ''
 const vimeoMP4Mobile = ''
 const api = 'https://api.vimeo.com/'
-const selectedFolder = ref<String>(plugin.data.content)
+const selectedFolder = ref<String>()
 const selectedVideo = ref('')
 const folderFilter = ref('')
 const videoFilter = ref('')
@@ -271,7 +274,14 @@ const videos = reactive([])
 //   }, 3000)
 //   load()
 // })
-console.log(plugin)
+watchEffect(() => {
+  plugin.actions.setContent({
+    hls: hls,
+    audio: audio,
+  })
+})
+
+console.log(plugin.data)
 </script>
 
 <!-- <template>
@@ -280,7 +290,7 @@ console.log(plugin)
   </pre>
 </template> -->
 <template>
-  <pre>{{ plugin.data }}</pre>
+  <pre>{{ plugin.data.story.content }}</pre>
   <hr />
 
   <!-- <div>
