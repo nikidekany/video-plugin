@@ -33,7 +33,6 @@ const filteredFolders = []
 const folders = []
 
 const filteredVideos = []
-const videos = []
 
 const { model: folderModel, onSelectFolder } = useVimeoFolders({
   singleFolderID: '12345',
@@ -50,7 +49,6 @@ watchEffect(() => {
   })
 })
 
-console.log(videos)
 console.log(plugin.data)
 console.log(hasAutoplay, 'true')
 console.log(plugin.actions.setContent)
