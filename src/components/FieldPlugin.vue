@@ -20,19 +20,19 @@ const vimeoMP4Mobile = 'vimeoMP4Mobile'
 // ref<Boolean>(plugin.data.content.vimeoMP4Mobile)
 const api = 'https://api.vimeo.com/'
 
-const selectedFolder = 'selectedFolder'
-const selectedVideo = 'selectedVideo'
+// const selectedFolder = 'selectedFolder'
+// const selectedVideo = 'selectedVideo'
 
-const folderFilter = 'folderFilter'
-const videoFilter = 'videoFilter'
+// const folderFilter = 'folderFilter'
+// const videoFilter = 'videoFilter'
 
-const searchFolderActive = false
-const searchVideoActive = false
+// const searchFolderActive = false
+// const searchVideoActive = false
 
-const filteredFolders = []
-const folders = []
+// const filteredFolders = []
+// const folders = []
 
-const filteredVideos = []
+// const filteredVideos = []
 
 const { model: folderModel, onSelectFolder } = useVimeoFolders({
   singleFolderID: '12345',
@@ -57,11 +57,11 @@ console.log(folderModel, onSelectFolder)
 </script>
 
 <template>
-  <pre>{{ plugin.data.content.hasAutoplay }}</pre>
+  <!-- <pre>{{ plugin.data.content.hasAutoplay }}</pre>
   <hr />
   <pre>{{ plugin.data.content.hasControls }}</pre>
   <hr />
-  <pre>{{ plugin.data.content.hasMute }}</pre>
+  <pre>{{ plugin.data.content.hasMute }}</pre> -->
   <hr />
   <pre>{{ plugin.data.content.audio }}</pre>
   <div>
