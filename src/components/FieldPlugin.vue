@@ -53,7 +53,7 @@ console.log(plugin.data)
 console.log(hasAutoplay, 'true')
 console.log(plugin.actions.setContent)
 console.log(plugin.data)
-console.log(folderModel, onSelectFolder)
+// console.log(folderModel, onSelectFolder)
 </script>
 
 <template>
@@ -63,7 +63,7 @@ console.log(folderModel, onSelectFolder)
   <hr />
   <pre>{{ plugin.data.content.hasMute }}</pre> -->
   <hr />
-  <pre>{{ plugin.data.content.audio }}</pre>
+  <!-- <pre>{{ plugin.data.content.audio }}</pre> -->
   <div>
     <div class="uk-form-controls">
       <label style="font-weight: 600">Vimeo Folder(s):</label>

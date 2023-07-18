@@ -68,26 +68,26 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
   }
   }
 
-  function loadFolder(folderID: string) {
-    fetchFromVimeo('folders', null, folderID).then((res) => {
-      const { name, metadata, resource_key } = res;
-      model.folders = [{ name, resource_key, metadata }];
-      model.filteredFolders = [{ name, resource_key, metadata }];
-      onSelectFolder(name);
-    });
-  }
+  // function loadFolder(folderID: string) {
+  //   fetchFromVimeo('folders', null, folderID).then((res) => {
+  //     const { name, metadata, resource_key } = res;
+  //     model.folders = [{ name, resource_key, metadata }];
+  //     model.filteredFolders = [{ name, resource_key, metadata }];
+  //     onSelectFolder(name);
+  //   });
+  // }
 
-  function loadAllFolders(folders: string[]) {
-    model.folders = [];
-    model.filteredFolders = [];
-    for (let i = 0; i < folders.length; i++) {
-      fetchFromVimeo('folders', null, folders[i]).then((res) => {
-        const { name, metadata, resource_key } = res;
-        model.folders.push({ name, resource_key, metadata });
-        model.filteredFolders.push({ name, resource_key, metadata });
-      });
-    }
-  }
+  // function loadAllFolders(folders: string[]) {
+  //   model.folders = [];
+  //   model.filteredFolders = [];
+  //   for (let i = 0; i < folders.length; i++) {
+  //     fetchFromVimeo('folders', null, folders[i]).then((res) => {
+  //       const { name, metadata, resource_key } = res;
+  //       model.folders.push({ name, resource_key, metadata });
+  //       model.filteredFolders.push({ name, resource_key, metadata });
+  //     });
+  //   }
+  // }
 
   function onSelectFolder(folderName: string) {
     model.selectedFolder = folderName;
@@ -101,11 +101,11 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
   });
 
   // Call the loading method based on provided options
-  if (options.singleFolderID !== undefined) {
-    loadFolder(options.singleFolderID);
-  } else if (options.folderIDs !== undefined) {
-    loadAllFolders(options.folderIDs.split(','));
-  }
+  // if (options.singleFolderID !== undefined) {
+  //   loadFolder(options.singleFolderID);
+  // } else if (options.folderIDs !== undefined) {
+  //   loadAllFolders(options.folderIDs.split(','));
+  // }
 
   return {
     model,
