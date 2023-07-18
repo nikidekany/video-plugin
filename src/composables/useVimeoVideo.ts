@@ -19,7 +19,6 @@ export function useVimeoVideos() {
     vimeoMP4: '',
     vimeoMP4Mobile: '',
   });
-
   function fetchFromVimeo(endpoint: string, videoURL: string) {
 
     return new Promise<VimeoVideo>((resolve) => {

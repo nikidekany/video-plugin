@@ -3,7 +3,7 @@ import VimeoPlayer from './VideoPlayer.vue'
 import { useFieldPlugin } from '../useFieldPlugin'
 import { ref, watch, watchEffect, reactive } from 'vue'
 import { Asset, FieldPluginResponse } from '@storyblok/field-plugin'
-import { useVimeoFolders } from '../composables/useVimeoFolders'
+// import { useVimeoFolders } from '../composables/useVimeoFolders'
 
 const plugin = useFieldPlugin()
 const hasAutoplay = true
@@ -34,9 +34,9 @@ const api = 'https://api.vimeo.com/'
 
 // const filteredVideos = []
 
-const { model: folderModel, onSelectFolder } = useVimeoFolders({
-  singleFolderID: '12345',
-})
+// const { model: folderModel, onSelectFolder } = useVimeoFolders({
+//   singleFolderID: '12345',
+// })
 
 watchEffect(() => {
   plugin.actions.setContent({
