@@ -1,11 +1,14 @@
 import { ref, reactive, watchEffect, Ref } from 'vue'
-
-interface VimeoVideo {
+import { VimeoFoldersOptions, useVimeoFolders } from './useVimeoFolders'
+import { VimeoFolder } from './useVimeoFolders'
+export interface VimeoVideo {
   name: string
-  // Add other properties based on the actual Vimeo video structure
+  resource_key: string
+  metadata: object
 }
 
-export function useVimeoVideos() {
+export function useVimeoVideos(options: VimeoFoldersOptions) {
+  const folders: Ref<VimeoFolder[]> = ref([])
   const videos: Ref<VimeoVideo[]> = ref([])
   const filteredVideos: Ref<VimeoVideo[]> = ref([])
   const videoFilter: Ref<string> = ref('')
@@ -18,30 +21,91 @@ export function useVimeoVideos() {
     vimeoHLS: '',
     vimeoMP4: '',
     vimeoMP4Mobile: '',
+    isLoading: false, // Add the isLoading property
   })
+  console.log(folders.value)
+  async function fetchFromVimeo(
+    endpoint: 'folders' | 'videos',
+    videoURL: string | null,
+    folderID: string | null,
+    token: string,
+    api: string,
+    userID: string,
+  ): Promise<any> {
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    }
 
-  function fetchFromVimeo(endpoint: string, videoURL: string) {
-    return new Promise<VimeoVideo>((resolve) => {
-      setTimeout(() => {
-        resolve({ name: 'Video 1' })
-      }, 1000)
-    })
+    try {
+      let url
+      switch (endpoint) {
+        case 'folders':
+          url = `${api}users/${userID}/projects/${folderID}`
+
+          break
+        case 'videos':
+          if (!videoURL) {
+            throw new Error('Video URL is missing.')
+          }
+          url = `${api}${videoURL}`
+          break
+        default:
+          throw new Error('Invalid endpoint')
+      }
+      const response = await fetch(url, {
+        headers,
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch data from Vimeo API')
+      }
+
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error('Error fetching data from Vimeo API:', error)
+      return Promise.reject(error)
+    }
   }
 
-  function getVideosFromFolder(folderName: string) {
-    // const found = model.folders.find((folder) => folder.name === folderName);
-    // if (found) {
-    //   fetchFromVimeo('videos', found.metadata.connections.videos.uri).then(
-    //     (res) => {
-    //       if (res.data && res.data.length === 1) {
-    //         model.videos = [res.data[0]];
-    //         onSelectVideo(res.data[0].name);
-    //       } else {
-    //         model.videos = res.data;
-    //       }
-    //     }
-    //   );
-    // }
+  async function getVideosFromFolder(folderName: string, folderID: string) {
+    const found = folders.value.find((folder) => folder.name === folderName)
+    if (found) {
+      try {
+        model.isLoading = true
+        const res = await fetchFromVimeo(
+          'videos',
+          found.metadata.connections.videos.uri, // Use the videos URI from the metadata
+          folderID,
+          options.token,
+          options.api,
+          options.userID,
+        )
+        console.log('found:', found) // Log the 'found' value
+        console.log('res:', res) // Log the 'res' value
+        if (res.data && res.data.length > 0) {
+          model.videos = res.data
+          model.filteredVideos = res.data
+          model.selectedVideo = res.data[0]?.name || '' // Update the selectedVideo property
+          model.vimeoHLS = res.data[0]?.metadata?.interactions?.stream?.hls
+          model.vimeoMP4 =
+            res.data[0]?.metadata?.interactions?.stream?.progressive[0]?.link
+          model.vimeoMP4Mobile =
+            res.data[0]?.metadata?.interactions?.stream?.progressive[1]?.link
+        } else {
+          model.videos = []
+          model.filteredVideos = []
+          model.selectedVideo = ''
+          model.vimeoHLS = ''
+          model.vimeoMP4 = ''
+          model.vimeoMP4Mobile = ''
+        }
+      } catch (error) {
+        console.error('Error loading videos from folder:', error)
+      } finally {
+        model.isLoading = false // Set isLoading to false after the API call is completed
+      }
+    }
   }
 
   function onSelectVideo(videoName: string) {
@@ -56,8 +120,10 @@ export function useVimeoVideos() {
   })
 
   return {
+    folders, // Return folders
     model,
     getVideosFromFolder,
     onSelectVideo,
+    isLoading: model.isLoading,
   }
 }

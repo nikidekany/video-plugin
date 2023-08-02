@@ -2,8 +2,20 @@ import { FieldPluginData, FieldPluginResponse } from '@storyblok/field-plugin'
 import { inject } from 'vue'
 
 export interface VideoContent {
-  hls: string
-  audio: string
+  hasAutoplay: boolean
+  hasControls: boolean
+  hasMute: boolean
+  userID: string
+  folderID: string
+  api: string
+  token: string
+  searchFolderActive: boolean
+  searchVideoActive: boolean
+  vimeoHLS: string
+  vimeoMP4: string
+  vimeoMP4Mobile: string
+  selectedFolder: string
+  selectedVideo: string
 }
 
 export interface VideoData extends FieldPluginData {

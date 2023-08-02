@@ -1,14 +1,16 @@
 import { ref, reactive, watchEffect, Ref } from 'vue'
-
-interface VimeoFolder {
+import { VimeoVideo } from './useVimeoVideos'
+export interface VimeoFolder {
   name: string
   resource_key: string
   metadata: object
 }
 
-interface VimeoFoldersOptions {
-  singleFolderID?: string
+export interface VimeoFoldersOptions {
   folderIDs?: string
+  api: string
+  userID: string
+  token: string
 }
 
 export function useVimeoFolders(options: VimeoFoldersOptions) {
@@ -21,6 +23,9 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
     filteredFolders,
     folderFilter,
     selectedFolder: '',
+    filteredVideos: [] as VimeoVideo[],
+    videoFilter: '',
+    selectedVideo: '',
   })
 
   async function fetchFromVimeo(
@@ -29,8 +34,8 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
     folderID: string,
     token: string,
     api: string,
-    userID: string,
-  ): Promise<any> {
+    user_id: string,
+  ) {
     const headers = {
       Authorization: `Bearer ${token}`,
     }
@@ -39,7 +44,8 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
       let url
       switch (endpoint) {
         case 'folders':
-          url = `${api}users/${userID}/projects/${folderID}`
+          url = `${api}/users/${user_id}/projects/${folderID}`
+          console.log(url)
           break
         case 'videos':
           if (!videoURL) {
@@ -50,7 +56,6 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
         default:
           throw new Error('Invalid endpoint')
       }
-
       const response = await fetch(url, {
         headers,
       })
@@ -66,33 +71,78 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
       return Promise.reject(error)
     }
   }
+  async function loadFolder(
+    folderID: string,
+    user_id: string,
+    api: string,
+    token: string,
+  ) {
+    try {
+      const res = await fetchFromVimeo(
+        'folders',
+        null,
+        folderID,
+        token,
+        api,
+        user_id,
+      )
+      const { name, metadata, resource_key } = res
+      folders.value = []
+      model.folders.push({
+        name,
+        resource_key,
+        metadata,
+      })
+      model.filteredFolders.push({
+        name,
+        resource_key,
+        metadata,
+      })
+      onSelectFolder(name)
+    } catch (error) {
+      console.error('Error loading folder:', error)
+    }
+  }
 
-  // function loadFolder(folderID: string) {
-  //   fetchFromVimeo('folders', null, folderID).then((res) => {
-  //     const { name, metadata, resource_key } = res
-  //     model.folders = [{ name, resource_key, metadata }]
-  //     model.filteredFolders = [{ name, resource_key, metadata }]
-  //     onSelectFolder(name)
-  //   })
-  // }
-
-  // function loadAllFolders(folders: string[]) {
-  //   model.folders = []
-  //   model.filteredFolders = []
-  //   for (let i = 0; i < folders.length; i++) {
-  //     fetchFromVimeo('folders', null, folders[i]).then((res) => {
-  //       const { name, metadata, resource_key } = res
-  //       model.folders.push({ name, resource_key, metadata })
-  //       model.filteredFolders.push({ name, resource_key, metadata })
-  //     })
-  //   }
-  // }
+  async function loadAllFolders(
+    folders: string[],
+    user_id: string,
+    api: string,
+    token: string,
+  ) {
+    model.folders = []
+    model.filteredFolders = []
+    for (let i = 0; i < folders.length; i++) {
+      try {
+        const res = await fetchFromVimeo(
+          'folders',
+          null,
+          folders[i],
+          token,
+          api,
+          user_id,
+        )
+        const { name, metadata, resource_key } = res
+        model.folders.push({
+          name,
+          resource_key,
+          metadata,
+        })
+        model.filteredFolders.push({
+          name,
+          resource_key,
+          metadata,
+        })
+      } catch (error) {
+        console.error('Error loading folder:', error)
+      }
+    }
+  }
 
   function onSelectFolder(folderName: string) {
     model.selectedFolder = folderName
     model.folderFilter = folderName
   }
-
   watchEffect(() => {
     model.filteredFolders = model.folders.filter((folder) =>
       folder.name.toLowerCase().includes(model.folderFilter.toLowerCase()),
@@ -100,13 +150,25 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
   })
 
   // Call the loading method based on provided options
-  // if (options.singleFolderID !== undefined) {
-  //   loadFolder(options.singleFolderID)
-  // } else if (options.folderIDs !== undefined) {
-  //   loadAllFolders(options.folderIDs.split(','))
-  // }
+
+  if (options.folderIDs !== undefined && options.folderIDs.length > 1) {
+    loadAllFolders(
+      options.folderIDs.split(','),
+      options.userID,
+      options.api,
+      options.token,
+    )
+  } else if (
+    options.folderIDs !== undefined &&
+    options.folderIDs.length === 1
+  ) {
+    loadFolder(options.folderIDs, options.userID, options.api, options.token)
+  }
   return {
     model,
     onSelectFolder,
+    filteredFolders: model.filteredFolders,
+    videoFilter: model.videoFilter,
+    selectedFolder: model.selectedFolder,
   }
 }
