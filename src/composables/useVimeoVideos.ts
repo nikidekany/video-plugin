@@ -72,10 +72,10 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
     const found = folders.value.find((folder) => folder.name === folderName)
     if (found) {
       try {
-        model.isLoading = true
+        model.isLoading = true // Set isLoading to true before making the API call
         const res = await fetchFromVimeo(
           'videos',
-          found.metadata.connections.videos.uri, // Use the videos URI from the metadata
+          `/folders/${folderID}/videos`, // Use the folderID to fetch videos from that folder
           folderID,
           options.token,
           options.api,

@@ -7,7 +7,8 @@ import { useVimeoVideos } from '../composables/useVimeoVideos'
 import { useVideoPlayer } from '../composables/useVideoPlayer'
 import { useSearchFilter } from '../composables/useSearchFilters'
 import { useFolderSelection } from '../composables/useFolderSelection'
-
+import { VimeoFolder } from '../composables/useVimeoFolders'
+import { VimeoVideo } from '../composables/useVimeoVideos'
 const plugin = useFieldPlugin()
 const hasAutoplay = ref(plugin.data.options.autoplay)
 const hasControls = ref(plugin.data.options.controls)
@@ -51,15 +52,15 @@ const { filteredList: filteredVideos, filterText: videoFilter } =
 
 const { selectedFolder, onSelectedFolder } = useFolderSelection()
 
-function getVideoSrc(): string {
-  if (!selectedFolder.value || !videoModel.selectedVideo) {
-    return ''
-  }
-  const videoSrc = selectedFolder.value.metadata.connections.videos.find(
-    (video: VimeoVideo) => video.name === videoModel.selectedVideo,
-  )
-  return videoSrc ? videoSrc.uri : ''
-}
+// function getVideoSrc(): string {
+//   if (!selectedFolder.value || !videoModel.selectedVideo) {
+//     return ''
+//   }
+//   const videoSrc = selectedFolder.value.metadata.connections.videos.find(
+//     (video: VimeoVideo) => video.name === videoModel.selectedVideo,
+//   )
+//   return videoSrc ? videoSrc.uri : ''
+// }
 
 watch(folderFilter, (newVal) => {
   filteredFolders.value = folderModel.folders.filter((folder) =>
@@ -170,7 +171,7 @@ console.log(onSelectFolder)
     </div>
     <div style="margin-top: 20px">
       <label style="font-weight: 600"
-        >Selected Folder: {{ selectedFolder.name }}</label
+        >Selected Folder: {{ selectedFolder?.name }}</label
       >
     </div>
 
@@ -193,14 +194,15 @@ console.log(onSelectFolder)
       infinite-scroll-distance="100"
       style="position: relative"
     >
-      <ul>
+      <!-- <ul>
         <li
-          v-for="video in selectedFolder.videos"
-          :key="video.name"
+          v-for="video in selectedFolder"
+          :key="video"
         >
-          <a @click="onSelectVideo(video.name)">{{ video.name }}</a>
+          <a @click="onSelectVideo(video)">{{ video }}</a>
         </li>
-      </ul>
+      </ul> -->
+      <div>{{ selectedFolder }}</div>
     </div>
 
     <div style="margin-top: 20px">
@@ -215,14 +217,8 @@ console.log(onSelectFolder)
         height="360"
         playsinline="true"
       >
-        <source
-          :src="getVideoSrc()"
-          type="application/x-mpegURL"
-        />
-        <source
-          :src="getVideoSrc()"
-          type="video/mp4"
-        />
+        <source type="application/x-mpegURL" />
+        <source type="video/mp4" />
       </video>
     </div>
     <div style="display: flex; flex-direction: row; margin-top: 10px">
