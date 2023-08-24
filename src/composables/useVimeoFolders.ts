@@ -1,9 +1,15 @@
 import { ref, reactive, watchEffect, Ref } from 'vue'
-import { VimeoVideo } from './useVimeoVideos'
+import { useVimeoVideos, VimeoVideo } from './useVimeoVideos'
 export interface VimeoFolder {
   name: string
   resource_key: string
-  metadata: object
+  metadata: {
+    connections: {
+      videos: {
+        uri: string
+      }
+    }
+  }
 }
 
 export interface VimeoFoldersOptions {
@@ -17,6 +23,7 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
   const folders: Ref<VimeoFolder[]> = ref([])
   const filteredFolders: Ref<VimeoFolder[]> = ref([])
   const folderFilter: Ref<string> = ref('')
+  const selectedFolder = ref<VimeoFolder | null>(null)
 
   const model = reactive({
     folders,
@@ -51,7 +58,8 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
           if (!videoURL) {
             throw new Error('Video URL is missing.')
           }
-          url = `${api}${videoURL}`
+          url = `${api}/users/${user_id}/projects/${folderID}/videos`
+          console.log(url)
           break
         default:
           throw new Error('Invalid endpoint')
@@ -138,10 +146,10 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
       }
     }
   }
-
-  function onSelectFolder(folderName: string) {
-    model.selectedFolder = folderName
-    model.folderFilter = folderName
+  const { getVideosFromFolder } = useVimeoVideos(options)
+  function onSelectFolder(folder: VimeoFolder) {
+    selectedFolder.value = folder
+    getVideosFromFolder(folder)
   }
   watchEffect(() => {
     model.filteredFolders = model.folders.filter((folder) =>
@@ -167,6 +175,7 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
   return {
     model,
     onSelectFolder,
+    getVideosFromFolder,
     filteredFolders: model.filteredFolders,
     videoFilter: model.videoFilter,
     selectedFolder: model.selectedFolder,

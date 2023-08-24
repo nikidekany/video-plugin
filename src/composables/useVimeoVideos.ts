@@ -1,10 +1,20 @@
 import { ref, reactive, watchEffect, Ref } from 'vue'
-import { VimeoFoldersOptions, useVimeoFolders } from './useVimeoFolders'
+import { VimeoFoldersOptions } from './useVimeoFolders'
 import { VimeoFolder } from './useVimeoFolders'
+
 export interface VimeoVideo {
   name: string
   resource_key: string
-  metadata: object
+  metadata: {
+    interactions: {
+      stream: {
+        hls: string
+        progressive: {
+          link: string
+        }[]
+      }
+    }
+  }
 }
 
 export function useVimeoVideos(options: VimeoFoldersOptions) {
@@ -12,7 +22,7 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
   const videos: Ref<VimeoVideo[]> = ref([])
   const filteredVideos: Ref<VimeoVideo[]> = ref([])
   const videoFilter: Ref<string> = ref('')
-
+  console.log(folders)
   const model = reactive({
     videos,
     filteredVideos,
@@ -21,16 +31,16 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
     vimeoHLS: '',
     vimeoMP4: '',
     vimeoMP4Mobile: '',
-    isLoading: false, // Add the isLoading property
+    isLoading: false,
   })
-  console.log(folders.value)
+
   async function fetchFromVimeo(
     endpoint: 'folders' | 'videos',
     videoURL: string | null,
     folderID: string | null,
     token: string,
     api: string,
-    userID: string,
+    user_id: string,
   ): Promise<any> {
     const headers = {
       Authorization: `Bearer ${token}`,
@@ -39,15 +49,12 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
     try {
       let url
       switch (endpoint) {
-        case 'folders':
-          url = `${api}users/${userID}/projects/${folderID}`
-
-          break
         case 'videos':
           if (!videoURL) {
             throw new Error('Video URL is missing.')
           }
-          url = `${api}${videoURL}`
+          url = `${api}/users/${user_id}/projects/${folderID}/videos`
+          console.log(url)
           break
         default:
           throw new Error('Invalid endpoint')
@@ -68,30 +75,30 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
     }
   }
 
-  async function getVideosFromFolder(folderName: string, folderID: string) {
-    const found = folders.value.find((folder) => folder.name === folderName)
+  async function getVideosFromFolder(folder: VimeoFolder) {
+    const found = folders.value.find((folder) => folder.name === folder.name)
+    console.log(found)
+    console.log(folder)
     if (found) {
       try {
         model.isLoading = true // Set isLoading to true before making the API call
         const res = await fetchFromVimeo(
           'videos',
-          `/folders/${folderID}/videos`, // Use the folderID to fetch videos from that folder
-          folderID,
+          found.metadata.connections.videos.uri,
+          found.resource_key,
           options.token,
           options.api,
           options.userID,
         )
-        console.log('found:', found) // Log the 'found' value
-        console.log('res:', res) // Log the 'res' value
-        if (res.data && res.data.length > 0) {
-          model.videos = res.data
-          model.filteredVideos = res.data
-          model.selectedVideo = res.data[0]?.name || '' // Update the selectedVideo property
-          model.vimeoHLS = res.data[0]?.metadata?.interactions?.stream?.hls
+        if (res && res.length > 0) {
+          model.videos = res
+          model.filteredVideos = res
+          model.selectedVideo = res[0]?.name || '' // Update the selectedVideo property
+          model.vimeoHLS = res[0]?.metadata?.interactions?.stream?.hls
           model.vimeoMP4 =
-            res.data[0]?.metadata?.interactions?.stream?.progressive[0]?.link
+            res[0]?.metadata?.interactions?.stream?.progressive[0]?.link
           model.vimeoMP4Mobile =
-            res.data[0]?.metadata?.interactions?.stream?.progressive[1]?.link
+            res[0]?.metadata?.interactions?.stream?.progressive[1]?.link
         } else {
           model.videos = []
           model.filteredVideos = []
@@ -111,6 +118,7 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
   function onSelectVideo(videoName: string) {
     model.selectedVideo = videoName
     model.videoFilter = videoName
+    console.log(model)
   }
 
   watchEffect(() => {

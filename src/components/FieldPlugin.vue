@@ -75,13 +75,6 @@ watch(videoFilter, (newVal) => {
 })
 
 watchEffect(() => {
-  // Apply the filtering based on the input in the respective fields
-  // filteredFolders.value = folderModel.folders.filter((folder) =>
-  //   folder.name.toLowerCase().includes(filterText.value.toLowerCase()),
-  // )
-  // filteredVideos.value = videoModel.videos.filter((video) =>
-  //   video.name.toLowerCase().includes(filterText.value.toLowerCase()),
-  // )
   plugin.actions.setContent({
     folders: {
       folderIDs: folderIDs,
@@ -126,15 +119,28 @@ function toggleVideoSearchOff() {
   }, 300)
 }
 
+// const videoSrc = computed(() => {
+//   if (!selectedFolder.value || !videoModel.selectedVideo) {
+//     return ''
+//   }
+
+//   // Use the selectedFolder value and videoModel.selectedVideo to get the video source
+//   const videoSrc = selectedFolder.value.metadata.connections.videos.find(
+//     (video: VimeoVideo) => video.name === videoModel.selectedVideo,
+//   )
+
+//   return videoSrc ? videoSrc.uri : ''
+// })
+
 const isLoadingVideos = computed(() => videoModel.isLoading)
 
 // console.log(plugin.data.content.hasMute)
 // console.log(plugin.data.options)
-console.log(selectedFolder.value)
+// console.log(selectedFolder.value)
 console.log(filteredFolders)
-console.log(filteredFolders.value)
-console.log(plugin.data.content.selectedFolder)
-console.log(onSelectFolder)
+// console.log(filteredFolders.value)
+// console.log(plugin.data.content.selectedFolder)
+console.log('selectedVideo')
 </script>
 
 <template>
@@ -152,7 +158,6 @@ console.log(onSelectFolder)
         placeholder="Select a folder..."
       />
     </div>
-
     <div
       v-if="plugin.data.content.searchFolderActive"
       class="select__dropdown"
@@ -173,6 +178,7 @@ console.log(onSelectFolder)
       <label style="font-weight: 600"
         >Selected Folder: {{ selectedFolder?.name }}</label
       >
+      <!-- <pre>{{ selectedFolder?.metadata }}</pre> -->
     </div>
 
     <div
@@ -188,21 +194,21 @@ console.log(onSelectFolder)
         @blur="toggleVideoSearchOff()"
       />
     </div>
+
     <div
       class="select__dropdown"
       infinite-scroll-disabled="loading"
       infinite-scroll-distance="100"
       style="position: relative"
     >
-      <!-- <ul>
+      <ul>
         <li
-          v-for="video in selectedFolder"
+          v-for="video in selectedFolder?.metadata.connections"
           :key="video"
         >
           <a @click="onSelectVideo(video)">{{ video }}</a>
         </li>
-      </ul> -->
-      <div>{{ selectedFolder }}</div>
+      </ul>
     </div>
 
     <div style="margin-top: 20px">
@@ -221,6 +227,7 @@ console.log(onSelectFolder)
         <source type="video/mp4" />
       </video>
     </div>
+
     <div style="display: flex; flex-direction: row; margin-top: 10px">
       <div class="sb-toggle sb-toggle--primary">
         <input
