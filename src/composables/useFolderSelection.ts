@@ -6,7 +6,7 @@ import { VimeoFolder } from './useVimeoFolders'
 export function useFolderSelection() {
   const selectedFolder = ref<VimeoFolder | null>(null)
   const { getVideosFromFolder } = useVimeoVideos({
-    folderIDs: '', // Add the folder IDs here as needed
+    folderIDs: '',
     api: '',
     userID: '',
     token: '',

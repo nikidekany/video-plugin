@@ -4,24 +4,35 @@ import { VimeoFolder } from './useVimeoFolders'
 
 export interface VimeoVideo {
   name: string
+  has_audio: boolean
+  link: string
+  embed: {
+    html: string
+  }
+  uri: string
+  play: {
+    hls: {
+      link: string
+    }
+  }
   resource_key: string
   metadata: {
-    interactions: {
-      stream: {
-        hls: string
-        progressive: {
-          link: string
-        }[]
+    connections: {
+      videos: {
+        uri: string
       }
     }
+    interactions: {}
   }
 }
 
 export function useVimeoVideos(options: VimeoFoldersOptions) {
   const folders: Ref<VimeoFolder[]> = ref([])
   const videos: Ref<VimeoVideo[]> = ref([])
+  console.log('videos', videos)
   const filteredVideos: Ref<VimeoVideo[]> = ref([])
   const videoFilter: Ref<string> = ref('')
+  const selectedVideo: Ref<VimeoVideo[]> = ref([])
   console.log(folders)
   const model = reactive({
     videos,
@@ -53,8 +64,8 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
           if (!videoURL) {
             throw new Error('Video URL is missing.')
           }
-          url = `${api}/users/${user_id}/projects/${folderID}/videos`
-          console.log(url)
+          url = `${api}${videoURL}`
+          console.log('test', url)
           break
         default:
           throw new Error('Invalid endpoint')
@@ -67,8 +78,8 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
         throw new Error('Failed to fetch data from Vimeo API')
       }
 
-      const data = await response.json()
-      return data
+      const data = await response
+      return data.json()
     } catch (error) {
       console.error('Error fetching data from Vimeo API:', error)
       return Promise.reject(error)
@@ -76,25 +87,27 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
   }
 
   async function getVideosFromFolder(folder: VimeoFolder) {
-    const found = folders.value.find((folder) => folder.name === folder.name)
-    console.log(found)
-    console.log(folder)
-    if (found) {
+    console.log('folder', folder)
+    console.log('Running getVideosFROMFOLDER')
+    if (folder) {
       try {
         model.isLoading = true // Set isLoading to true before making the API call
         const res = await fetchFromVimeo(
           'videos',
-          found.metadata.connections.videos.uri,
-          found.resource_key,
+          folder.metadata.connections.videos.uri,
+          folder.resource_key,
           options.token,
           options.api,
           options.userID,
         )
-        if (res && res.length > 0) {
-          model.videos = res
-          model.filteredVideos = res
-          model.selectedVideo = res[0]?.name || '' // Update the selectedVideo property
-          model.vimeoHLS = res[0]?.metadata?.interactions?.stream?.hls
+
+        if (res) {
+          console.log('Results from fetched videos from folder', res)
+          // res.data.map((video) => ({ ...video }))
+          console.log('data', res.data)
+          model.videos = res.data
+          model.filteredVideos = res.data
+          model.vimeoHLS = res.data[0]?.play.progressive[0]?.link
           model.vimeoMP4 =
             res[0]?.metadata?.interactions?.stream?.progressive[0]?.link
           model.vimeoMP4Mobile =
@@ -107,6 +120,7 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
           model.vimeoMP4 = ''
           model.vimeoMP4Mobile = ''
         }
+        console.log('selectedVideo', model.selectedVideo)
       } catch (error) {
         console.error('Error loading videos from folder:', error)
       } finally {
@@ -115,17 +129,18 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
     }
   }
 
-  function onSelectVideo(videoName: string) {
+  function onSelectVideo(videoName: string, videoLink: string) {
     model.selectedVideo = videoName
+    // model.selectedVideo.link = videoLink
     model.videoFilter = videoName
-    console.log(model)
+    console.log('-onSelectedVideo-', videoName)
   }
 
-  watchEffect(() => {
-    model.filteredVideos = model.videos.filter((video) =>
-      video.name.toLowerCase().includes(model.videoFilter.toLowerCase()),
-    )
-  })
+  // watchEffect(() => {
+  //   model.filteredVideos = model.videos.filter((video) =>
+  //     video.name.toLowerCase().includes(model.videoFilter.toLowerCase()),
+  //   )
+  // })
 
   return {
     folders, // Return folders

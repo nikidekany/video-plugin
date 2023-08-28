@@ -17,7 +17,7 @@ const hasMute = ref(plugin.data.options.mute)
 const token = plugin.data.options.token
 const user_id = plugin.data.options.user_id
 const folderIDs = plugin.data.options.folderIDs
-const apiA = 'https://api.vimeo.com/'
+const apiA = 'https://api.vimeo.com'
 
 const { model: folderModel, onSelectFolder } = useVimeoFolders({
   folderIDs: folderIDs,
@@ -62,6 +62,13 @@ const { selectedFolder, onSelectedFolder } = useFolderSelection()
 //   return videoSrc ? videoSrc.uri : ''
 // }
 
+watch(selectedFolder, () => {
+  console.log('Selected a folder', selectedFolder)
+
+  if (selectedFolder.value !== null) {
+    getVideosFromFolder(selectedFolder.value)
+  }
+})
 watch(folderFilter, (newVal) => {
   filteredFolders.value = folderModel.folders.filter((folder) =>
     folder.name.toLowerCase().includes(newVal.toLowerCase()),
@@ -81,8 +88,8 @@ watchEffect(() => {
       userID: user_id,
     },
     videoModel: {
-      videos: videoModel.videos.map((video) => ({ ...video })),
-
+      // videos: videoModel.videos.map((video) => ({ ...video })),
+      vimeoHLS: videoModel.vimeoHLS,
       selectedVideo: videoModel.selectedVideo,
     },
     videoPlayerModel: {
@@ -139,13 +146,13 @@ const isLoadingVideos = computed(() => videoModel.isLoading)
 // console.log(selectedFolder.value)
 console.log(filteredFolders)
 // console.log(filteredFolders.value)
-// console.log(plugin.data.content.selectedFolder)
-console.log('selectedVideo')
+console.log('vimeoHLS', videoModel.vimeoHLS)
+console.log('selectedVideo', videoModel)
 </script>
 
 <template>
   <div>
-    <!-- <pre>{{ plugin.data.content }}</pre> -->
+    <!-- <pre>{{ videoModel }}</pre> -->
     <!-- <hr />
     <pre>{{ plugin.data.options }}</pre> -->
     <div class="uk-form-controls">
@@ -178,7 +185,6 @@ console.log('selectedVideo')
       <label style="font-weight: 600"
         >Selected Folder: {{ selectedFolder?.name }}</label
       >
-      <!-- <pre>{{ selectedFolder?.metadata }}</pre> -->
     </div>
 
     <div
@@ -203,10 +209,10 @@ console.log('selectedVideo')
     >
       <ul>
         <li
-          v-for="video in selectedFolder?.metadata.connections"
-          :key="video"
+          v-for="video in videoModel.videos"
+          :key="video.name"
         >
-          <a @click="onSelectVideo(video)">{{ video }}</a>
+          <a @click="onSelectVideo(video.name, video.link)">{{ video.name }}</a>
         </li>
       </ul>
     </div>
@@ -215,6 +221,7 @@ console.log('selectedVideo')
       <label style="font-weight: 600"
         >Preview: {{ videoModel.selectedVideo }}</label
       >
+      <div>{{ videoModel.vimeoHLS }}</div>
       <video
         style="margin-top: 10px"
         id="my-video"
@@ -223,8 +230,14 @@ console.log('selectedVideo')
         height="360"
         playsinline="true"
       >
-        <source type="application/x-mpegURL" />
-        <source type="video/mp4" />
+        <source
+          :src="videoModel.vimeoHLS"
+          type="application/x-mpegURL"
+        />
+        <source
+          type="video/mp4"
+          :src="videoModel.vimeoMP4"
+        />
       </video>
     </div>
 

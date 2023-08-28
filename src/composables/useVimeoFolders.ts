@@ -9,6 +9,7 @@ export interface VimeoFolder {
         uri: string
       }
     }
+    interactions: {}
   }
 }
 
@@ -147,6 +148,7 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
     }
   }
   const { getVideosFromFolder } = useVimeoVideos(options)
+
   function onSelectFolder(folder: VimeoFolder) {
     selectedFolder.value = folder
     getVideosFromFolder(folder)
