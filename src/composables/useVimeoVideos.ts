@@ -14,6 +14,21 @@ export interface VimeoVideo {
     hls: {
       link: string
     }
+    progressive: {
+      [key: string]: {
+        type: string
+        codec: string
+        width: number
+        height: number
+        link_expiration_time: string
+        link: string
+        created_time: string
+        fps: number
+        size: number
+        md5: any
+        rendition: string
+      }
+    }
   }
   resource_key: string
   metadata: {
@@ -32,8 +47,10 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
   console.log('videos', videos)
   const filteredVideos: Ref<VimeoVideo[]> = ref([])
   const videoFilter: Ref<string> = ref('')
-  const selectedVideo: Ref<VimeoVideo[]> = ref([])
+  const selectedVideo: Ref<VimeoVideo | undefined> = ref()
+
   console.log(folders)
+
   const model = reactive({
     videos,
     filteredVideos,
@@ -106,18 +123,12 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
           // res.data.map((video) => ({ ...video }))
           console.log('data', res.data)
           model.videos = res.data
-          model.filteredVideos = res.data
-          model.vimeoHLS = res.data[0]?.play.progressive[0]?.link
-          model.vimeoMP4 =
-            res[0]?.metadata?.interactions?.stream?.progressive[0]?.link
+
           model.vimeoMP4Mobile =
             res[0]?.metadata?.interactions?.stream?.progressive[1]?.link
         } else {
           model.videos = []
           model.filteredVideos = []
-          model.selectedVideo = ''
-          model.vimeoHLS = ''
-          model.vimeoMP4 = ''
           model.vimeoMP4Mobile = ''
         }
         console.log('selectedVideo', model.selectedVideo)
@@ -129,11 +140,13 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
     }
   }
 
-  function onSelectVideo(videoName: string, videoLink: string) {
-    model.selectedVideo = videoName
-    // model.selectedVideo.link = videoLink
-    model.videoFilter = videoName
-    console.log('-onSelectedVideo-', videoName)
+  function onSelectVideo(videoLink: string, video: VimeoVideo) {
+    selectedVideo.value = video
+    model.videoFilter = videoLink
+    model.vimeoHLS = video?.play.hls.link
+    model.vimeoMP4 = video?.play.progressive[3].link
+    console.log('-onSelectedVideo-', video)
+    console.log('model', model)
   }
 
   // watchEffect(() => {
@@ -148,5 +161,6 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
     getVideosFromFolder,
     onSelectVideo,
     isLoading: model.isLoading,
+    selectedVideo,
   }
 }

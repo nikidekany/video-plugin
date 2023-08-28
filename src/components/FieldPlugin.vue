@@ -31,6 +31,7 @@ const {
   getVideosFromFolder,
   onSelectVideo,
   isLoading,
+  selectedVideo,
 } = useVimeoVideos({
   folderIDs: folderIDs,
   api: apiA,
@@ -212,22 +213,19 @@ console.log('selectedVideo', videoModel)
           v-for="video in videoModel.videos"
           :key="video.name"
         >
-          <a @click="onSelectVideo(video.name, video.link)">{{ video.name }}</a>
+          <a @click="onSelectVideo(video.link, video)">{{ video.name }}</a>
         </li>
       </ul>
     </div>
-
+    <!-- <pre>{{ selectedVideo }}</pre> -->
+    <pre>      VideoModel: {{ videoModel.vimeoHLS }}</pre>
     <div style="margin-top: 20px">
-      <label style="font-weight: 600"
-        >Preview: {{ videoModel.selectedVideo }}</label
-      >
-      <div>{{ videoModel.vimeoHLS }}</div>
+      <label style="font-weight: 600">Preview: {{ selectedVideo?.name }}</label>
+      <!-- <div>{{ videoModel.vimeoHLS }}</div> -->
       <video
-        style="margin-top: 10px"
+        style="margin-top: 10px; width: 200px; height: 200px"
         id="my-video"
         preload="auto"
-        width="100%"
-        height="360"
         playsinline="true"
       >
         <source
@@ -271,6 +269,23 @@ console.log('selectedVideo', videoModel)
           >Autoplay</label
         >
       </div>
+      <video
+        style="width: 200px; height: 200px"
+        id="my-video"
+        preload="auto"
+        playsinline="true"
+        autoplay="true"
+        :src="videoModel.vimeoHLS"
+      >
+        <source
+          :src="videoModel.vimeoHLS"
+          type="application/x-mpegURL"
+        />
+        <source
+          type="video/mp4"
+          :src="videoModel.vimeoMP4"
+        />
+      </video>
       <div
         style="margin-left: 15px"
         class="sb-toggle sb-toggle--primary"
