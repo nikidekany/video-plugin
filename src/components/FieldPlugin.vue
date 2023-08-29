@@ -45,6 +45,13 @@ const { model: videoPlayerModel } = useVideoPlayer({
   hasControls: true,
 })
 
+const MP4 = computed(() => {
+  return videoModel.vimeoMP4
+})
+const HLS = computed(() => {
+  return videoModel.vimeoHLS
+})
+
 const { filteredList: filteredFolders, filterText: folderFilter } =
   useSearchFilter<VimeoFolder>(folderModel.folders)
 
@@ -52,16 +59,6 @@ const { filteredList: filteredVideos, filterText: videoFilter } =
   useSearchFilter<VimeoVideo>(videoModel.videos)
 
 const { selectedFolder, onSelectedFolder } = useFolderSelection()
-
-// function getVideoSrc(): string {
-//   if (!selectedFolder.value || !videoModel.selectedVideo) {
-//     return ''
-//   }
-//   const videoSrc = selectedFolder.value.metadata.connections.videos.find(
-//     (video: VimeoVideo) => video.name === videoModel.selectedVideo,
-//   )
-//   return videoSrc ? videoSrc.uri : ''
-// }
 
 watch(selectedFolder, () => {
   console.log('Selected a folder', selectedFolder)
@@ -89,9 +86,9 @@ watchEffect(() => {
       userID: user_id,
     },
     videoModel: {
-      // videos: videoModel.videos.map((video) => ({ ...video })),
+      vimeoMP4: videoModel.vimeoMP4,
       vimeoHLS: videoModel.vimeoHLS,
-      selectedVideo: videoModel.selectedVideo,
+      selectedVideo: selectedVideo.value,
     },
     videoPlayerModel: {
       hasMute: hasMute.value,
@@ -127,36 +124,19 @@ function toggleVideoSearchOff() {
   }, 300)
 }
 
-// const videoSrc = computed(() => {
-//   if (!selectedFolder.value || !videoModel.selectedVideo) {
-//     return ''
-//   }
-
-//   // Use the selectedFolder value and videoModel.selectedVideo to get the video source
-//   const videoSrc = selectedFolder.value.metadata.connections.videos.find(
-//     (video: VimeoVideo) => video.name === videoModel.selectedVideo,
-//   )
-
-//   return videoSrc ? videoSrc.uri : ''
-// })
-
 const isLoadingVideos = computed(() => videoModel.isLoading)
 
-// console.log(plugin.data.content.hasMute)
-// console.log(plugin.data.options)
-// console.log(selectedFolder.value)
 console.log(filteredFolders)
-// console.log(filteredFolders.value)
 console.log('vimeoHLS', videoModel.vimeoHLS)
-console.log('selectedVideo', videoModel)
+console.log('videoModel', videoModel)
 </script>
 
 <template>
   <div>
-    <!-- <pre>{{ videoModel }}</pre> -->
-    <!-- <hr />
-    <pre>{{ plugin.data.options }}</pre> -->
-    <div class="uk-form-controls">
+    <div
+      class="uk-form-controls"
+      v-if="folderModel.folders && folderModel.folders.length !== 0"
+    >
       <label style="font-weight: 600">Vimeo Folder(s):</label>
       <input
         class="uk-width-1-1"
@@ -164,6 +144,7 @@ console.log('selectedVideo', videoModel)
         @focus="toggleFolderSearchOn()"
         @blur="toggleFolderSearchOff()"
         placeholder="Select a folder..."
+        :disabled="folderModel.folders && folderModel.folders.length <= 1"
       />
     </div>
     <div
@@ -182,27 +163,27 @@ console.log('selectedVideo', videoModel)
         </li>
       </ul>
     </div>
-    <div style="margin-top: 20px">
-      <label style="font-weight: 600"
-        >Selected Folder: {{ selectedFolder?.name }}</label
-      >
-    </div>
 
     <div
       style="margin-top: 20px"
       class="uk-form-controls"
+      v-if="selectedFolder"
     >
-      <label style="font-weight: 600">Videos:</label>
+      <label style="font-weight: 600"
+        >Videos in: {{ selectedFolder?.name }}</label
+      >
       <input
         class="uk-width-1-1"
-        v-model="videoFilter"
+        v-model="videoModel.videoFilter"
         placeholder="Select a video..."
         @focus="toggleVideoSearchOn()"
         @blur="toggleVideoSearchOff()"
+        :disabled="videoModel.videos && videoModel.videos.length === 0"
       />
     </div>
 
     <div
+      v-if="plugin.data.content.searchVideoActive"
       class="select__dropdown"
       infinite-scroll-disabled="loading"
       infinite-scroll-distance="100"
@@ -213,33 +194,41 @@ console.log('selectedVideo', videoModel)
           v-for="video in videoModel.videos"
           :key="video.name"
         >
-          <a @click="onSelectVideo(video.link, video)">{{ video.name }}</a>
+          <a @click="onSelectVideo(video)">{{ video.name }}</a>
         </li>
       </ul>
     </div>
-    <!-- <pre>{{ selectedVideo }}</pre> -->
-    <pre>      VideoModel: {{ videoModel.vimeoHLS }}</pre>
-    <div style="margin-top: 20px">
-      <label style="font-weight: 600">Preview: {{ selectedVideo?.name }}</label>
-      <!-- <div>{{ videoModel.vimeoHLS }}</div> -->
+
+    <div
+      style="margin-top: 20px"
+      v-if="videoModel.videos && selectedVideo"
+    >
       <video
-        style="margin-top: 10px; width: 200px; height: 200px"
+        width="300"
+        height="200"
         id="my-video"
         preload="auto"
         playsinline="true"
+        :key="HLS || MP4"
+        :autoplay="Boolean(hasAutoplay)"
+        :muted="Boolean(hasMute)"
+        :controls="Boolean(hasControls)"
       >
         <source
-          :src="videoModel.vimeoHLS"
+          :src="HLS"
           type="application/x-mpegURL"
         />
         <source
           type="video/mp4"
-          :src="videoModel.vimeoMP4"
+          :src="MP4"
         />
       </video>
     </div>
 
-    <div style="display: flex; flex-direction: row; margin-top: 10px">
+    <div
+      style="display: flex; flex-direction: row; margin-top: 10px"
+      v-if="HLS || MP4"
+    >
       <div class="sb-toggle sb-toggle--primary">
         <input
           id="mute"
@@ -269,23 +258,6 @@ console.log('selectedVideo', videoModel)
           >Autoplay</label
         >
       </div>
-      <video
-        style="width: 200px; height: 200px"
-        id="my-video"
-        preload="auto"
-        playsinline="true"
-        autoplay="true"
-        :src="videoModel.vimeoHLS"
-      >
-        <source
-          :src="videoModel.vimeoHLS"
-          type="application/x-mpegURL"
-        />
-        <source
-          type="video/mp4"
-          :src="videoModel.vimeoMP4"
-        />
-      </video>
       <div
         style="margin-left: 15px"
         class="sb-toggle sb-toggle--primary"
@@ -305,3 +277,5 @@ console.log('selectedVideo', videoModel)
     </div>
   </div>
 </template>
+
+<style></style>

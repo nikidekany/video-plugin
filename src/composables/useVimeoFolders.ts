@@ -55,13 +55,7 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
           url = `${api}/users/${user_id}/projects/${folderID}`
           console.log(url)
           break
-        case 'videos':
-          if (!videoURL) {
-            throw new Error('Video URL is missing.')
-          }
-          url = `${api}/users/${user_id}/projects/${folderID}/videos`
-          console.log(url)
-          break
+
         default:
           throw new Error('Invalid endpoint')
       }
