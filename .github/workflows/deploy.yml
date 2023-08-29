@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: "yarn"
+          cache: 'yarn'
       - name: Install
         run: yarn install
       - name: Build
@@ -34,4 +34,4 @@ jobs:
       - name: Deploy
         env:
           STORYBLOK_PERSONAL_ACCESS_TOKEN: ${{secrets.STORYBLOK_PERSONAL_ACCESS_TOKEN}}
-        run: yarn deploy --skipPrompts --scope my-plugins
+        run: yarn deploy --skipPrompts --name my-plugin --scope partner-portal
