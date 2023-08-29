@@ -34,4 +34,4 @@ jobs:
       - name: Deploy
         env:
           STORYBLOK_PERSONAL_ACCESS_TOKEN: ${{secrets.STORYBLOK_PERSONAL_ACCESS_TOKEN}}
-        run: yarn deploy --skipPrompts --video-plugin my-plugin --scope my-plugins
+        run: yarn deploy --skipPrompts --name video-plugin --scope my-plugins
