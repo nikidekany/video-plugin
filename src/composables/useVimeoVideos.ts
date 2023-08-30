@@ -69,12 +69,12 @@ interface Model {
 export function useVimeoVideos(options: VimeoFoldersOptions) {
   const folders: Ref<VimeoFolder[]> = ref([])
   const videos: Ref<VimeoVideo[]> = ref([])
-  console.log('videos', videos)
+  // console.log('videos', videos)
   const filteredVideos: Ref<VimeoVideo[]> = ref([])
   const videoFilter: Ref<string> = ref('')
   const selectedVideo: Ref<VimeoVideo | undefined> = ref()
 
-  console.log(folders)
+  // console.log(folders)
 
   const model = reactive<Model>({
     videos,
@@ -107,7 +107,7 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
             throw new Error('Video URL is missing.')
           }
           url = `${api}${videoURL}`
-          console.log('test', url)
+          // console.log('test', url)
           break
         default:
           throw new Error('Invalid endpoint')
@@ -129,8 +129,8 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
   }
 
   async function getVideosFromFolder(folder: VimeoFolder) {
-    console.log('folder', folder)
-    console.log('Running getVideosFROMFOLDER')
+    // console.log('folder', folder)
+    // console.log('Running getVideosFROMFOLDER')
     if (folder) {
       try {
         model.isLoading = true // Set isLoading to true before making the API call
@@ -144,8 +144,8 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
         )
 
         if (res) {
-          console.log('Results from fetched videos from folder', res)
-          console.log('data', res.data)
+          // console.log('Results from fetched videos from folder', res)
+          // console.log('data', res.data)
           model.videos = res.data
         } else {
           model.videos = []
@@ -160,7 +160,7 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
   }
 
   function onSelectVideo(video: VimeoVideo) {
-    console.log(video)
+    // console.log(video)
     selectedVideo.value = video
 
     let hlsLink = null
@@ -189,17 +189,17 @@ export function useVimeoVideos(options: VimeoFoldersOptions) {
 
     // console.log('-onSelectedVideo-', video)
     // console.log('model', model)
-    console.log('highestRenditionMP4Link', highestRenditionMP4Link)
-    console.log('vimeoHLS', model.vimeoHLS)
-    console.log('vimeoMP4', model.vimeoMP4)
+    // console.log('highestRenditionMP4Link', highestRenditionMP4Link)
+    // console.log('vimeoHLS', model.vimeoHLS)
+    // console.log('vimeoMP4', model.vimeoMP4)
   }
 
   watchEffect(() => {
-    console.log('videoFilter', videoFilter)
+    console.log('videoFilter', videoFilter.value)
     model.filteredVideos = model.videos.filter((video) =>
       video.name.toLowerCase().includes(model.videoFilter.toLowerCase()),
     )
-    console.log('search')
+    console.log('filteredVideos VimeoVideos', filteredVideos)
   })
 
   return {

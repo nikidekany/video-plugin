@@ -89,6 +89,7 @@ watchEffect(() => {
       vimeoMP4: videoModel.vimeoMP4,
       vimeoHLS: videoModel.vimeoHLS,
       selectedVideo: selectedVideo.value,
+      filteredVideos: filteredVideos.value.map((video) => ({ ...video })),
     },
     videoPlayerModel: {
       hasMute: hasMute.value,
@@ -98,7 +99,6 @@ watchEffect(() => {
     selectedFolder: selectedFolder.value,
     filteredFolders: filteredFolders.value.map((folder) => ({ ...folder })),
     folderFilter: folderFilter.value,
-    filteredVideos: filteredVideos.value.map((video) => ({ ...video })),
     videoFilter: videoFilter.value,
     searchFolderActive: false,
     searchVideoActive: false,
@@ -126,9 +126,8 @@ function toggleVideoSearchOff() {
 
 const isLoadingVideos = computed(() => videoModel.isLoading)
 
-console.log(filteredFolders)
-console.log('vimeoHLS', videoModel.vimeoHLS)
-console.log('videoModel', videoModel)
+console.log('filteredVideos in Field', videoModel.filteredVideos)
+console.log('FILTEREDFOLDERS IN FIELD', filteredFolders)
 </script>
 
 <template>
@@ -181,7 +180,7 @@ console.log('videoModel', videoModel)
         :disabled="videoModel.videos && videoModel.videos.length === 0"
       />
     </div>
-
+    <!-- <pre style="white-space: normal">{{ videoModel.filteredVideos }}</pre> -->
     <div
       v-if="plugin.data.content.searchVideoActive"
       class="select__dropdown"
@@ -191,7 +190,7 @@ console.log('videoModel', videoModel)
     >
       <ul>
         <li
-          v-for="video in videoModel.videos"
+          v-for="video in videoModel.filteredVideos"
           :key="video.name"
         >
           <a @click="onSelectVideo(video)">{{ video.name }}</a>

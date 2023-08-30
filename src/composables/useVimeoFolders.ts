@@ -53,7 +53,7 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
       switch (endpoint) {
         case 'folders':
           url = `${api}/users/${user_id}/projects/${folderID}`
-          console.log(url)
+          // console.log(url)
           break
 
         default:
@@ -151,6 +151,7 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
     model.filteredFolders = model.folders.filter((folder) =>
       folder.name.toLowerCase().includes(model.folderFilter.toLowerCase()),
     )
+    console.log('FILTEREDFOLDERS IN FOLDERS', filteredFolders)
   })
 
   // Call the loading method based on provided options
