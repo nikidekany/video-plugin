@@ -130,7 +130,7 @@ const isLoadingVideos = computed(() => videoModel.isLoading)
 </script>
 
 <template>
-  <div style="min-height: 500px">
+  <div style="height: 500px">
     <div
       style="min-height: 100px"
       class="uk-form-controls"
