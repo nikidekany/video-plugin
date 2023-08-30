@@ -233,7 +233,7 @@ const isLoadingVideos = computed(() => videoModel.isLoading)
     </div>
 
     <div
-      style="display: flex; flex-direction: column; margin-top: 10px; gap: 15x"
+      style="display: flex; flex-direction: column; margin-top: 10px; gap: 15px"
       v-if="HLS || MP4"
     >
       <div class="sb-toggle sb-toggle--primary">
