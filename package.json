@@ -10,7 +10,7 @@
     "deploy": "npx @storyblok/field-plugin-cli@beta deploy"
   },
   "dependencies": {
-    "@storyblok/design-system": "^3.13.0",
+    "@storyblok/design-system": "^3.15.1",
     "@storyblok/field-plugin": "0.0.1-beta.2",
     "vue": "^3.2.47"
   },

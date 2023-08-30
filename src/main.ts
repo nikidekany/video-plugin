@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
-import './style.css'
+import BlokInk from '@storyblok/design-system'
+import '@storyblok/design-system/dist/storyblok-design-system.css'
 import App from './App.vue'
 
 if (!document.querySelector('#app')) {
@@ -8,7 +9,9 @@ if (!document.querySelector('#app')) {
   rootElement.id = 'app'
   document.body.appendChild(rootElement)
 }
-createApp(App).mount('#app')
+const app = createApp(App)
+app.use(BlokInk)
+app.mount('#app')
 
 // This error replaces another error which message is harder to understand and impossible to avoid util the issue https://github.com/storyblok/field-plugin/issues/107 has been resolved.
 throw new Error(

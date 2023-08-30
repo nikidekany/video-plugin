@@ -9,7 +9,10 @@ import { useSearchFilter } from '../composables/useSearchFilters'
 import { useFolderSelection } from '../composables/useFolderSelection'
 import { VimeoFolder } from '../composables/useVimeoFolders'
 import { VimeoVideo } from '../composables/useVimeoVideos'
+import { SbTextField } from '@storyblok/design-system'
+import { SbSelect } from '@storyblok/design-system'
 const plugin = useFieldPlugin()
+
 const hasAutoplay = ref(plugin.data.options.autoplay)
 const hasControls = ref(plugin.data.options.controls)
 const hasMute = ref(plugin.data.options.mute)
@@ -123,39 +126,46 @@ function toggleVideoSearchOff() {
 }
 
 const isLoadingVideos = computed(() => videoModel.isLoading)
+//        <!-- v-if="plugin.data.content.searchFolderActive" -->
 </script>
 
 <template>
   <div>
     <div
+      style="min-height: 100px"
       class="uk-form-controls"
       v-if="folderModel.folders && folderModel.folders.length !== 0"
     >
-      <label style="font-weight: 600">Vimeo Folder(s):</label>
-      <input
-        class="uk-width-1-1"
+      <SbTextField
+        class="square sb-pt-7"
+        style="height: 50px"
         v-model="folderFilter"
         @focus="toggleFolderSearchOn()"
         @blur="toggleFolderSearchOff()"
         placeholder="Select a folder..."
         :disabled="folderModel.folders && folderModel.folders.length <= 1"
+        id="vimeoFolder"
+        name="vimeoFolder"
+        label="Vimeo Folder(s):"
+        required
+        clearable
       />
-    </div>
-    <div
-      v-if="plugin.data.content.searchFolderActive"
-      class="select__dropdown"
-      infinite-scroll-disabled="loading"
-      infinite-scroll-distance="100"
-      style="position: relative"
-    >
-      <ul>
-        <li
-          v-for="folder in filteredFolders"
-          :key="folder.name"
-        >
-          <a @click="onSelectedFolder(folder)">{{ folder.name }}</a>
-        </li>
-      </ul>
+
+      <div
+        v-if="plugin.data.content.searchFolderActive"
+        infinite-scroll-disabled="loading"
+        infinite-scroll-distance="100"
+        style="position: relative"
+      >
+        <ul>
+          <li
+            v-for="folder in filteredFolders"
+            :key="folder.name"
+          >
+            <a @click="onSelectedFolder(folder)">{{ folder.name }}</a>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <div
@@ -164,18 +174,22 @@ const isLoadingVideos = computed(() => videoModel.isLoading)
       v-if="selectedFolder"
     >
       <label style="font-weight: 600"
-        >Videos in: {{ selectedFolder?.name }}</label
+        >Selected folder: {{ selectedFolder?.name }}</label
       >
-      <input
-        class="uk-width-1-1"
+      <SbTextField
+        class="square sb-pt-7"
         v-model="videoModel.videoFilter"
         placeholder="Select a video..."
         @focus="toggleVideoSearchOn()"
         @blur="toggleVideoSearchOff()"
         :disabled="videoModel.videos && videoModel.videos.length === 0"
+        id="vimeoVideo"
+        name="vimeoVideo"
+        label="Video(s):"
+        required
+        clearable
       />
     </div>
-    <!-- <pre style="white-space: normal">{{ videoModel.filteredVideos }}</pre> -->
     <div
       v-if="plugin.data.content.searchVideoActive"
       class="select__dropdown"
@@ -198,8 +212,7 @@ const isLoadingVideos = computed(() => videoModel.isLoading)
       v-if="videoModel.videos && selectedVideo"
     >
       <video
-        width="300"
-        height="200"
+        style="width: 100%; height: 200px"
         id="my-video"
         preload="auto"
         playsinline="true"
@@ -220,7 +233,7 @@ const isLoadingVideos = computed(() => videoModel.isLoading)
     </div>
 
     <div
-      style="display: flex; flex-direction: row; margin-top: 10px"
+      style="display: flex; flex-direction: column; margin-top: 10px; gap: 15x"
       v-if="HLS || MP4"
     >
       <div class="sb-toggle sb-toggle--primary">
@@ -236,10 +249,7 @@ const isLoadingVideos = computed(() => videoModel.isLoading)
           >Mute</label
         >
       </div>
-      <div
-        style="margin-left: 15px"
-        class="sb-toggle sb-toggle--primary"
-      >
+      <div class="sb-toggle sb-toggle--primary">
         <input
           id="autoplay"
           class="sb-toggle__native"
@@ -252,10 +262,7 @@ const isLoadingVideos = computed(() => videoModel.isLoading)
           >Autoplay</label
         >
       </div>
-      <div
-        style="margin-left: 15px"
-        class="sb-toggle sb-toggle--primary"
-      >
+      <div class="sb-toggle sb-toggle--primary">
         <input
           id="controls"
           class="sb-toggle__native"
@@ -272,4 +279,15 @@ const isLoadingVideos = computed(() => videoModel.isLoading)
   </div>
 </template>
 
-<style></style>
+<style>
+ul {
+  list-style: none;
+  padding-bottom: 20px;
+}
+a {
+  font-size: 16px;
+}
+a:hover {
+  cursor: pointer;
+}
+</style>
