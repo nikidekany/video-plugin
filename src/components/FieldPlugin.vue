@@ -61,8 +61,6 @@ const { filteredList: filteredVideos, filterText: videoFilter } =
 const { selectedFolder, onSelectedFolder } = useFolderSelection()
 
 watch(selectedFolder, () => {
-  console.log('Selected a folder', selectedFolder)
-
   if (selectedFolder.value !== null) {
     getVideosFromFolder(selectedFolder.value)
   }
@@ -125,9 +123,6 @@ function toggleVideoSearchOff() {
 }
 
 const isLoadingVideos = computed(() => videoModel.isLoading)
-
-console.log('filteredVideos in Field', videoModel.filteredVideos)
-console.log('FILTEREDFOLDERS IN FIELD', filteredFolders)
 </script>
 
 <template>
