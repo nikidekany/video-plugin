@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import VimeoPlayer from './VideoPlayer.vue'
 import { useFieldPlugin } from '../useFieldPlugin'
 import { ref, watch, watchEffect, reactive, onMounted, computed } from 'vue'
 import { useVimeoFolders } from '../composables/useVimeoFolders'
@@ -10,7 +9,7 @@ import { useFolderSelection } from '../composables/useFolderSelection'
 import { VimeoFolder } from '../composables/useVimeoFolders'
 import { VimeoVideo } from '../composables/useVimeoVideos'
 import { SbTextField } from '@storyblok/design-system'
-import { SbSelect } from '@storyblok/design-system'
+import { SbToggle } from '@storyblok/design-system'
 const plugin = useFieldPlugin()
 
 const hasAutoplay = ref(plugin.data.options.autoplay)
@@ -73,6 +72,7 @@ watch(folderFilter, (newVal) => {
     folder.name.toLowerCase().includes(newVal.toLowerCase()),
   )
 })
+console.log(filteredFolders)
 
 watch(videoFilter, (newVal) => {
   filteredVideos.value = videoModel.videos.filter((video) =>
@@ -126,16 +126,11 @@ function toggleVideoSearchOff() {
 }
 
 const isLoadingVideos = computed(() => videoModel.isLoading)
-//        <!-- v-if="plugin.data.content.searchFolderActive" -->
 </script>
 
 <template>
-  <div style="height: 500px">
-    <div
-      style="min-height: 100px"
-      class="uk-form-controls"
-      v-if="folderModel.folders && folderModel.folders.length !== 0"
-    >
+  <div>
+    <div v-if="folderModel.folders && folderModel.folders.length !== 0">
       <SbTextField
         class="square sb-pt-7"
         style="height: 50px"
@@ -168,14 +163,10 @@ const isLoadingVideos = computed(() => videoModel.isLoading)
       </div>
     </div>
 
-    <div
-      style="margin-top: 20px"
-      class="uk-form-controls"
-      v-if="selectedFolder"
-    >
-      <label style="font-weight: 600"
-        >Selected folder: {{ selectedFolder?.name }}</label
-      >
+    <div v-if="selectedFolder">
+      <p style="font-weight: 600">
+        Selected folder: {{ selectedFolder?.name }}
+      </p>
       <SbTextField
         class="square sb-pt-7"
         v-model="videoModel.videoFilter"
@@ -233,61 +224,74 @@ const isLoadingVideos = computed(() => videoModel.isLoading)
     </div>
 
     <div
-      style="display: flex; flex-direction: column; margin-top: 10px; gap: 15px"
+      class="controls-wrapper"
       v-if="HLS || MP4"
     >
-      <div class="sb-toggle sb-toggle--primary">
-        <input
+      <div class="flexRow">
+        <!-- <div>1</div>
+        <div>2</div>
+        <div>3</div> -->
+        <SbToggle
           id="mute"
           class="sb-toggle__native"
           type="checkbox"
           v-model="hasMute"
+          icon="volume-x"
         />
-        <label
-          class="sb-toggle__label"
-          for="mute"
-          >Mute</label
-        >
+        <label class="toggleLabel">Mute</label>
       </div>
-      <div class="sb-toggle sb-toggle--primary">
-        <input
+
+      <div class="flexRow">
+        <SbToggle
           id="autoplay"
           class="sb-toggle__native"
           type="checkbox"
           v-model="hasAutoplay"
+          icon="play"
         />
-        <label
-          class="sb-toggle__label"
-          for="autoplay"
-          >Autoplay</label
-        >
+        <label class="toggleLabel">Autoplay</label>
       </div>
-      <div class="sb-toggle sb-toggle--primary">
-        <input
+
+      <div class="flexRow">
+        <SbToggle
           id="controls"
           class="sb-toggle__native"
           type="checkbox"
           v-model="hasControls"
+          icon="sliders-horizontal"
         />
-        <label
-          class="sb-toggle__label"
-          for="controls"
-          >Controls</label
-        >
+
+        <label class="toggleLabel">Enable Controls</label>
       </div>
     </div>
   </div>
 </template>
 
 <style>
+.controls-wrapper {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  .flexRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+  }
+}
 ul {
   list-style: none;
-  padding-bottom: 20px;
+  padding: 0 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 a {
   font-size: 16px;
 }
 a:hover {
   cursor: pointer;
+  font-weight: bold;
 }
 </style>
