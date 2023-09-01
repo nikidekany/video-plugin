@@ -22,8 +22,8 @@ export interface VimeoFoldersOptions {
 
 export function useVimeoFolders(options: VimeoFoldersOptions) {
   const folders: Ref<VimeoFolder[]> = ref([])
-  const filteredFolders: Ref<VimeoFolder[]> = ref([])
-  const folderFilter: Ref<string> = ref('')
+  const filteredFolders: Ref<VimeoFolder[]> | null = ref([])
+  const folderFilter: Ref<string> | null = ref('')
   const selectedFolder = ref<VimeoFolder | null>(null)
 
   const model = reactive({
@@ -143,6 +143,7 @@ export function useVimeoFolders(options: VimeoFoldersOptions) {
   const { getVideosFromFolder } = useVimeoVideos(options)
 
   function onSelectFolder(folder: VimeoFolder) {
+    console.log(folder)
     selectedFolder.value = folder
     getVideosFromFolder(folder)
   }

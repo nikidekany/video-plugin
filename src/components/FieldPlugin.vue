@@ -10,6 +10,8 @@ import { VimeoFolder } from '../composables/useVimeoFolders'
 import { VimeoVideo } from '../composables/useVimeoVideos'
 import { SbTextField } from '@storyblok/design-system'
 import { SbToggle } from '@storyblok/design-system'
+import { SbSelect } from '@storyblok/design-system'
+
 const plugin = useFieldPlugin()
 
 const hasAutoplay = ref(plugin.data.options.autoplay)
@@ -86,12 +88,12 @@ watchEffect(() => {
       folderIDs: folderIDs,
       userID: user_id,
     },
-    videoModel: {
-      vimeoMP4: videoModel.vimeoMP4,
-      vimeoHLS: videoModel.vimeoHLS,
-      selectedVideo: selectedVideo.value,
-      filteredVideos: filteredVideos.value.map((video) => ({ ...video })),
-    },
+
+    vimeoMP4: videoModel.vimeoMP4,
+    vimeoHLS: videoModel.vimeoHLS,
+    selectedVideo: selectedVideo.value,
+    filteredVideos: filteredVideos.value.map((video) => ({ ...video })),
+
     videoPlayerModel: {
       hasMute: hasMute.value,
       hasAutoplay: hasAutoplay.value,
@@ -126,81 +128,73 @@ function toggleVideoSearchOff() {
 }
 
 const isLoadingVideos = computed(() => videoModel.isLoading)
+// folderOptions
+const folderOptions = computed(() => {
+  return filteredFolders.value.map((folder) => ({
+    label: folder.name,
+    value: folder,
+  }))
+})
+
+const selectedFolderValue = ref<string | null>(null)
+
+watch(selectedFolderValue, (newVal) => {
+  console.log(newVal, selectedFolderValue)
+  const folderExists = folderModel.folders.find(
+    (folder) => folder.name === newVal,
+  )
+
+  if (folderExists !== null && folderExists) {
+    onSelectedFolder(folderExists)
+  }
+})
+// VideoOptions
+const videoOptions = computed(() => {
+  return videoModel.filteredVideos.map((video) => ({
+    label: video.name,
+    value: video,
+  }))
+})
+const selectedVideoValue = ref<string | null>(null)
+
+watch(selectedVideoValue, (newVal) => {
+  console.log(newVal, selectedVideoValue)
+  if (newVal !== null) {
+    const videoExists = videoModel.videos.find((video) => video.name === newVal)
+    if (videoExists !== null && videoExists) {
+      onSelectVideo(videoExists)
+    }
+  }
+})
 </script>
 
 <template>
-  <div>
-    <div v-if="folderModel.folders && folderModel.folders.length !== 0">
-      <SbTextField
-        class="square sb-pt-7"
-        style="height: 50px"
-        v-model="folderFilter"
-        @focus="toggleFolderSearchOn()"
-        @blur="toggleFolderSearchOff()"
-        placeholder="Select a folder..."
-        :disabled="folderModel.folders && folderModel.folders.length <= 1"
-        id="vimeoFolder"
-        name="vimeoFolder"
-        label="Vimeo Folder(s):"
-        required
-        clearable
-      />
-
-      <div
-        v-if="plugin.data.content.searchFolderActive"
-        infinite-scroll-disabled="loading"
-        infinite-scroll-distance="100"
-        style="position: relative"
-      >
-        <ul>
-          <li
-            v-for="folder in filteredFolders"
-            :key="folder.name"
-          >
-            <a @click="onSelectedFolder(folder)">{{ folder.name }}</a>
-          </li>
-        </ul>
+  <div style="height: 500px">
+    <div class="input-wrapper">
+      <div v-if="folderModel.folders && folderModel.folders.length !== 0">
+        <SbSelect
+          v-model="selectedFolderValue"
+          :filterable="folderFilter"
+          :options="folderOptions.map((folder) => folder.label)"
+          label="Choose folder"
+          clearable
+        />
       </div>
-    </div>
 
-    <div v-if="selectedFolder">
-      <p style="font-weight: 600">
-        Selected folder: {{ selectedFolder?.name }}
-      </p>
-      <SbTextField
-        class="square sb-pt-7"
-        v-model="videoModel.videoFilter"
-        placeholder="Select a video..."
-        @focus="toggleVideoSearchOn()"
-        @blur="toggleVideoSearchOff()"
-        :disabled="videoModel.videos && videoModel.videos.length === 0"
-        id="vimeoVideo"
-        name="vimeoVideo"
-        label="Video(s):"
-        required
-        clearable
-      />
-    </div>
-    <div
-      v-if="plugin.data.content.searchVideoActive"
-      class="select__dropdown"
-      infinite-scroll-disabled="loading"
-      infinite-scroll-distance="100"
-      style="position: relative"
-    >
-      <ul>
-        <li
-          v-for="video in videoModel.filteredVideos"
-          :key="video.name"
-        >
-          <a @click="onSelectVideo(video)">{{ video.name }}</a>
-        </li>
-      </ul>
+      <div v-if="selectedFolder">
+        <SbSelect
+          v-model="selectedVideoValue"
+          :filterable="videoFilter"
+          :options="videoOptions.map((video) => video.label)"
+          label="Choose video"
+          clearable
+        />
+      </div>
     </div>
 
     <div
       style="margin-top: 20px"
-      v-if="videoModel.videos && selectedVideo"
+      v-if="videoModel.videos && selectedVideoValue"
     >
       <video
         style="width: 100%; height: 200px"
@@ -228,15 +222,11 @@ const isLoadingVideos = computed(() => videoModel.isLoading)
       v-if="HLS || MP4"
     >
       <div class="flexRow">
-        <!-- <div>1</div>
-        <div>2</div>
-        <div>3</div> -->
         <SbToggle
           id="mute"
           class="sb-toggle__native"
           type="checkbox"
           v-model="hasMute"
-          icon="volume-x"
         />
         <label class="toggleLabel">Mute</label>
       </div>
@@ -247,7 +237,6 @@ const isLoadingVideos = computed(() => videoModel.isLoading)
           class="sb-toggle__native"
           type="checkbox"
           v-model="hasAutoplay"
-          icon="play"
         />
         <label class="toggleLabel">Autoplay</label>
       </div>
@@ -258,7 +247,6 @@ const isLoadingVideos = computed(() => videoModel.isLoading)
           class="sb-toggle__native"
           type="checkbox"
           v-model="hasControls"
-          icon="sliders-horizontal"
         />
 
         <label class="toggleLabel">Enable Controls</label>
@@ -268,6 +256,10 @@ const isLoadingVideos = computed(() => videoModel.isLoading)
 </template>
 
 <style>
+.input-wrapper {
+  display: grid;
+  gap: 15px;
+}
 .controls-wrapper {
   padding: 10px;
   display: flex;
