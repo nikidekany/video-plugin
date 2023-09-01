@@ -264,12 +264,12 @@ watch(selectedVideoValue, (newVal) => {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  .flexRow {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 15px;
-  }
+}
+.flexRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 15px;
 }
 ul {
   list-style: none;
