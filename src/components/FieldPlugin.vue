@@ -181,7 +181,7 @@ watch(selectedVideoValue, (newVal) => {
         />
       </div>
 
-      <div v-if="selectedFolder">
+      <div v-if="selectedFolderValue">
         <SbSelect
           v-model="selectedVideoValue"
           :filterable="videoFilter"
@@ -215,41 +215,40 @@ watch(selectedVideoValue, (newVal) => {
           :src="MP4"
         />
       </video>
-    </div>
+      <div
+        class="controls-wrapper"
+        v-if="HLS || MP4"
+      >
+        <div class="flexRow">
+          <SbToggle
+            id="mute"
+            class="sb-toggle__native"
+            type="checkbox"
+            v-model="hasMute"
+          />
+          <label class="toggleLabel">Mute</label>
+        </div>
 
-    <div
-      class="controls-wrapper"
-      v-if="HLS || MP4"
-    >
-      <div class="flexRow">
-        <SbToggle
-          id="mute"
-          class="sb-toggle__native"
-          type="checkbox"
-          v-model="hasMute"
-        />
-        <label class="toggleLabel">Mute</label>
-      </div>
+        <div class="flexRow">
+          <SbToggle
+            id="autoplay"
+            class="sb-toggle__native"
+            type="checkbox"
+            v-model="hasAutoplay"
+          />
+          <label class="toggleLabel">Autoplay</label>
+        </div>
 
-      <div class="flexRow">
-        <SbToggle
-          id="autoplay"
-          class="sb-toggle__native"
-          type="checkbox"
-          v-model="hasAutoplay"
-        />
-        <label class="toggleLabel">Autoplay</label>
-      </div>
+        <div class="flexRow">
+          <SbToggle
+            id="controls"
+            class="sb-toggle__native"
+            type="checkbox"
+            v-model="hasControls"
+          />
 
-      <div class="flexRow">
-        <SbToggle
-          id="controls"
-          class="sb-toggle__native"
-          type="checkbox"
-          v-model="hasControls"
-        />
-
-        <label class="toggleLabel">Enable Controls</label>
+          <label class="toggleLabel">Enable Controls</label>
+        </div>
       </div>
     </div>
   </div>
