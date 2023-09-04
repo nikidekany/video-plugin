@@ -194,7 +194,7 @@ watch(selectedVideoValue, (newVal) => {
 
     <div
       style="margin-top: 20px"
-      v-if="videoModel.videos && selectedVideoValue"
+      v-if="videoModel.videos && selectedVideoValue && selectedFolderValue"
     >
       <video
         style="width: 100%; height: 200px"
